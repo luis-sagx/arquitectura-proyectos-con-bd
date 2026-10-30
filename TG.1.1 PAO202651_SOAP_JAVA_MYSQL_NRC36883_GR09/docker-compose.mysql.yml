@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: eurekabank-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en el archivo .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-eurekabank}
+      MYSQL_USER: ${MYSQL_USER:-monster}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-monster9}
+    ports:
+      - "3307:3306"
+    volumes:
+      - eurekabank-mysql-data:/var/lib/mysql
+      - "./03. DBB/mysql/init:/docker-entrypoint-initdb.d:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "mysql --protocol=TCP --host=127.0.0.1 --user=$${MYSQL_USER} --password=$${MYSQL_PASSWORD} --database=$${MYSQL_DATABASE} --execute='SELECT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  eurekabank-mysql-data:

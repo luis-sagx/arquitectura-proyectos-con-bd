@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - EuBank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'eubank-primary': '#0B1F3A',
+                        'eubank-secondary': '#173F66',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 font-sans bg-slate-950 bg-cover bg-center"
+      style="background-image: linear-gradient(90deg, rgba(4, 12, 25, 0.3), rgba(4, 12, 25, 0.48)), url('/images/login-background.webp');">
+
+    <main class="w-full max-w-sm rounded-2xl border border-white/20 bg-white/95 p-8 shadow-2xl backdrop-blur-sm sm:p-10">
+        <header class="mb-8 text-center">
+            <p class="mb-2 text-sm font-bold uppercase tracking-[0.28em] text-eubank-secondary">JAVA SOAP</p>
+            <h1 class="text-3xl font-bold text-eubank-primary">Iniciar sesión</h1>
+            <p class="mt-2 text-sm text-slate-600">Accede a tu banca EuBank</p>
+        </header>
+
+        <div th:if="${error != null}" class="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+            <strong class="font-semibold">Error: </strong>
+            <span th:text="${error}"></span>
+        </div>
+
+        <form method="post" th:action="@{/login}" class="space-y-5">
+            <div>
+                <label for="usuario" class="mb-2 block text-sm font-medium text-slate-700">Usuario</label>
+                <input id="usuario" type="text" name="usuario" autocomplete="username" required
+                       class="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-eubank-secondary focus:ring-2 focus:ring-eubank-secondary/30" />
+            </div>
+
+            <div>
+                <label for="clave" class="mb-2 block text-sm font-medium text-slate-700">Contraseña</label>
+                <input id="clave" type="password" name="clave" autocomplete="current-password" required
+                       class="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-eubank-secondary focus:ring-2 focus:ring-eubank-secondary/30" />
+            </div>
+
+            <button type="submit"
+                    class="w-full rounded-lg bg-eubank-primary px-4 py-3 font-semibold text-white transition hover:bg-eubank-secondary focus:outline-none focus:ring-4 focus:ring-eubank-secondary/30">
+                Iniciar Sesión
+            </button>
+        </form>
+    </main>
+
+</body>
+</html>

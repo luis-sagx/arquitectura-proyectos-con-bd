@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle ?: 'Dashboard'} + ' - EuBank'"></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script th:inline="javascript">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'eubank-primary': '#0B1F3A',
+                        'eubank-secondary': '#173F66',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <style>
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #173F66;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        table thead { background-color: #0B1F3A; }
+        table thead th { color: #FFFFFF; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img th:src="@{/images/image-sidebar.webp}" alt="EurekaBank" class="h-10 w-full max-w-[200px] object-contain">
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a th:if="${session.Usuario != null}" th:href="@{/dashboard}"
+                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Panel de Control
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center" th:if="${session.Usuario != null}">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-700">
+                            Usuario: <strong class="text-eubank-primary" th:text="${session.Usuario}"></strong>
+                        </span>
+                        <a th:href="@{/logout}"
+                           class="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium transition duration-200">
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <main role="main">
+            
+            <div class="mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button class="tab-button active border-b-2 border-eubank-secondary py-2 px-1 text-sm font-medium text-eubank-secondary" data-tab="cuentas">
+                            💳 Cuentas de Clientes
+                        </button>
+                        <button class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="movimientos">
+                            📊 Movimientos
+                        </button>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <div id="cuentas" class="tab-pane active">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-eubank-primary to-eubank-secondary text-white px-6 py-4">
+                            <h5 class="text-lg font-bold mb-0">Lista de Cuentas</h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-6 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-4 flex items-center justify-between shadow-sm">
+                                <div class="flex items-center space-x-4">
+                                    <div>
+                                        <h6 class="text-lg font-semibold text-eubank-primary">Gestión de Cuentas</h6>
+                                        <p class="text-sm text-gray-600">Administra y consulta las cuentas bancarias</p>
+                                    </div>
+                                </div>
+                                <div class="hidden sm:block">
+                                    <svg class="w-12 h-12 text-eubank-primary opacity-20" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                                    <div class="flex-1">
+                                        <label for="filtroEstado" class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Estado:</label>
+                                        <select id="filtroEstado" class="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            <option value="">-- Todos --</option>
+                                            <option value="ACTIVO">Activo</option>
+                                            <option value="INACTIVO">Inactivo</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="filtroMoneda" class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Moneda:</label>
+                                        <select id="filtroMoneda" class="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            <option value="">-- Todas --</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label for="busquedaCliente" class="block text-sm font-medium text-gray-700 mb-2">Buscar por Cliente:</label>
+                                        <input type="text" id="busquedaCliente" placeholder="Nombre del cliente" class="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="cuentasLoading" class="text-center py-10">
+                                <div class="loading-spinner"></div>
+                                <p class="text-eubank-primary font-medium">Cargando cuentas...</p>
+                            </div>
+                            <div id="cuentasContent" class="hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Moneda</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cuentasTableBody" class="bg-white divide-y divide-gray-200">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="cuentasError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="movimientos" class="tab-pane hidden">
+                     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r from-eubank-primary to-eubank-secondary text-white px-6 py-4">
+                            <h5 class="text-lg font-bold mb-0">Movimientos Bancarios</h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-6 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-4 flex items-center justify-between shadow-sm">
+                                <div class="flex items-center space-x-4">
+                                    <img th:src="@{/images/SulliGeneral.png}" alt="Sulli Bank" class="h-24 w-24 object-contain">
+                                    <div>
+                                        <h6 class="text-lg font-semibold text-eubank-primary">Movimientos Bancarios</h6>
+                                        <p class="text-sm text-gray-600">Revisa los movimientos realizados entre las cuentas bancarias.</p>
+                                    </div>
+                                </div>
+                                <div class="hidden sm:block">
+                                    <svg class="w-12 h-12 text-eubank-primary opacity-20" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                                    <div class="flex-1">
+                                        <label for="selectCuenta" class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Cuenta (opcional):</label>
+                                        <select id="selectCuenta" class="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            <option value="">-- Todas las cuentas --</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button id="btnCrearMovimiento"
+                                                class="bg-gradient-to-r from-eubank-primary to-eubank-secondary text-white px-6 py-2 rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition duration-200 font-medium inline-flex items-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            </svg>
+                                            Crear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="movimientosLoading" class="text-center py-10">
+                                <div class="loading-spinner"></div>
+                                <p class="text-eubank-primary font-medium">Cargando movimientos...</p>
+                            </div>
+                            <div id="movimientosContent" class="hidden">
+                                <div class="mb-4">
+                                    <h6 class="text-lg font-semibold text-gray-800" id="movimientosTitle">Todos los Movimientos</h6>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuenta</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referencia</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Importe</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Actual</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="movimientosTableBody" class="bg-white divide-y divide-gray-200">
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="movimientosEmpty" class="bg-slate-100 border border-slate-300 text-slate-800 px-4 py-3 rounded-lg hidden">
+                                No hay movimientos disponibles.
+                            </div>
+                            <div id="movimientosError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modalCrearMovimiento" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-[120vh] shadow-lg rounded-md bg-white">
+                    <div class="mt-3">
+                        <div class="bg-gradient-to-r from-eubank-primary to-eubank-secondary text-white px-6 py-4 rounded-t-md">
+                            <h3 class="text-lg font-bold">Crear Nuevo Movimiento</h3>
+                        </div>
+
+                        <div class="px-6 py-4">
+                            <div class="flex gap-6">
+                                <div class="flex-1">
+                                    <form id="formCrearMovimiento">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label for="tipoMovimiento" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento:</label>
+                                                <select id="tipoMovimiento" name="tipo" required
+                                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                                    <option value="">-- Seleccionar Tipo --</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="cuentaOrigen" class="block text-sm font-medium text-gray-700 mb-2">Cuenta Origen:</label>
+                                                <input type="text" id="cuentaOrigen" name="cuentaOrigen" required
+                                                       placeholder="Ej: 00100001"
+                                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            </div>
+                                            <div id="divCuentaDestino" class="hidden">
+                                                <label for="cuentaDestino" class="block text-sm font-medium text-gray-700 mb-2">Cuenta Destino:</label>
+                                                <input type="text" id="cuentaDestino" name="cuentaDestino"
+                                                       placeholder="Ej: 00200001"
+                                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            </div>
+                                            <div>
+                                                <label for="monto" class="block text-sm font-medium text-gray-700 mb-2">Monto:</label>
+                                                <input type="number" id="monto" name="importe" required step="0.01" min="0.01"
+                                                       placeholder="0.00"
+                                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-eubank-primary focus:border-transparent">
+                                            </div>
+                                        </div>
+                                        <div id="modalError" class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg hidden"></div>
+                                        <div class="flex justify-end space-x-3 mt-6">
+                                            <button type="button" id="btnCancelarModal"
+                                                    class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition duration-200">
+                                                Cancelar
+                                            </button>
+                                            <button type="submit"
+                                                    class="px-6 py-2 bg-gradient-to-r from-eubank-primary to-eubank-secondary text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition duration-200">
+                                                Crear Movimiento
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div id="imagenTipoMovimiento" class="hidden flex-shrink-0 w-86 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <img id="imgTipoMovimiento" src="" alt="Tipo de Movimiento" class="w-[50vh] object-contain">
+                                        <p id="textoTipoMovimiento" class="mt-3 text-sm font-semibold text-eubank-primary"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <th:block th:fragment="footer-scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            
+            // --- ¡TRADUCCIÓN DE URLS! ---
+            const URL_GET_CUENTAS = /*[[@{/dashboard/get-cuentas}]]*/ 'error';
+            const URL_GET_MOVIMIENTOS = /*[[@{/dashboard/get-movimientos}]]*/ 'error';
+            const URL_GET_TODOS_MOVIMIENTOS = /*[[@{/dashboard/get-todos-movimientos}]]*/ 'error';
+            const URL_GET_TIPOS_MOVIMIENTO = /*[[@{/dashboard/get-tipos-movimiento}]]*/ 'error';
+            const URL_CREAR_MOVIMIENTO = /*[[@{/dashboard/crear-movimiento}]]*/ 'error';
+            const URL_TEST_SERVICE = /*[[@{/dashboard/get-tipos-movimiento}]]*/ 'error'; // Re-usamos get-tipos
+            
+            // --- ¡TRADUCCIÓN DE IMÁGENES! ---
+            const imagenesMovimiento = {
+                'DEPOSITO': { img: /*[[@{/images/Deposito.png}]]*/ '', texto: 'Depósito' },
+                'RETIRO': { img: /*[[@{/images/Retiro.png}]]*/ '', texto: 'Retiro' },
+                'TRANSFERENCIA': { img: /*[[@{/images/Transferencia.png}]]*/ '', texto: 'Transferencia' },
+            };
+            
+            let cuentasData = [];
+            let tiposMovimiento = [];
+
+            // --- ¡TODO TU CÓDIGO JS DE .NET PEGADO AQUÍ! ---
+
+            $(document).ready(function() {
+                console.log('Página cargada (Java/Thymeleaf)');
+                
+                $.get(URL_TEST_SERVICE, () => console.log('Servicio OK'))
+                    .fail(() => console.error('Error conectando al servicio SOAP'));
+
+                cargarTiposMovimiento();
+                cargarCuentas();
+
+                // Manejar cambio de pestañas
+                $('.tab-button').click(function() {
+                    const tabName = $(this).data('tab');
+                    $('.tab-button').removeClass('active border-eubank-secondary text-eubank-secondary').addClass('border-transparent text-gray-500');
+                    $(this).addClass('active border-eubank-secondary text-eubank-secondary');
+                    $('.tab-pane').addClass('hidden');
+                    $('#' + tabName).removeClass('hidden');
+                    if (tabName === 'movimientos' && !$('#selectCuenta').val()) {
+                        cargarTodosMovimientos();
+                    }
+                });
+
+                // Evento para abrir modal de crear movimiento
+                $('#btnCrearMovimiento').click(function() {
+                    $('#modalCrearMovimiento').removeClass('hidden');
+                });
+
+                // Evento para cerrar modal
+                $('#btnCancelarModal').click(function() {
+                    cerrarModal();
+                });
+
+                // Cerrar modal al hacer clic fuera
+                $('#modalCrearMovimiento').click(function(e) {
+                    if (e.target === this) {
+                        cerrarModal();
+                    }
+                });
+
+                // Evento para cambio de tipo de movimiento
+                $('#tipoMovimiento').change(function() {
+                    const tipo = $(this).val();
+                    
+                    if (tipo === 'TRANSFERENCIA') {
+                        $('#divCuentaDestino').removeClass('hidden');
+                        $('#cuentaDestino').attr('required', true);
+                    } else {
+                        $('#divCuentaDestino').addClass('hidden');
+                        $('#cuentaDestino').removeAttr('required').val('');
+                    }
+                    
+                    if (tipo && imagenesMovimiento[tipo]) {
+                        $('#imgTipoMovimiento').attr('src', imagenesMovimiento[tipo].img);
+                        $('#textoTipoMovimiento').text(imagenesMovimiento[tipo].texto);
+                        $('#imagenTipoMovimiento').removeClass('hidden');
+                    } else {
+                        $('#imagenTipoMovimiento').addClass('hidden');
+                    }
+                });
+
+                // Manejar envío del formulario de creación de movimiento
+                $('#formCrearMovimiento').submit(function(e) {
+                    e.preventDefault();
+
+                    const formData = {
+                        tipo: $('#tipoMovimiento').val(),
+                        cuentaOrigen: $('#cuentaOrigen').val(),
+                        cuentaDestino: $('#cuentaDestino').val(),
+                        importe: parseFloat($('#monto').val())
+                    };
+
+                    if (!formData.tipo || !formData.cuentaOrigen || !formData.importe) {
+                        mostrarErrorModal('Por favor complete todos los campos requeridos.');
+                        return;
+                    }
+
+                    if ((formData.tipo === 'TRANSFERENCIA') && !formData.cuentaDestino) {
+                        mostrarErrorModal('Para transferencias se requiere la cuenta destino.');
+                        return;
+                    }
+                    crearMovimiento(formData);
+                });
+                
+                // Event listeners for account filters
+                $('#filtroEstado, #filtroMoneda').on('change', function() {
+                    filtrarCuentas();
+                });
+                $('#busquedaCliente').on('keyup', function() {
+                    filtrarCuentas();
+                });
+                
+                // Evento cuando se selecciona una cuenta
+                $('#selectCuenta').change(function() {
+                    const codigoCuenta = $(this).val();
+                    if (codigoCuenta) {
+                        cargarMovimientos(codigoCuenta);
+                    } else {
+                        cargarTodosMovimientos();
+                    }
+                });
+                
+            }); // Fin de $(document).ready
+            
+
+            function cargarTiposMovimiento() {
+                console.log('Cargando tipos de movimiento...');
+                $.ajax({
+                    url: URL_GET_TIPOS_MOVIMIENTO,
+                    type: 'GET',
+                    success: function(data) {
+                        console.log('Tipos de movimiento obtenidos:', data);
+                        tiposMovimiento = data;
+                        llenarSelectTiposMovimiento(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar tipos de movimiento:', error);
+                    }
+                });
+            }
+
+            function llenarSelectTiposMovimiento(tipos) {
+                const select = $('#tipoMovimiento');
+                select.empty();
+                select.append('<option value="">-- Seleccionar Tipo --</option>');
+                tipos.forEach(function(tipo) {
+                    select.append(`<option value="${tipo}">${tipo}</option>`);
+                });
+            }
+
+            function cargarCuentas() {
+                console.log('Iniciando carga de cuentas...');
+                $('#cuentasContent').addClass('hidden');
+                $('#cuentasError').addClass('hidden');
+                $('#cuentasLoading').removeClass('hidden');
+                $.ajax({
+                    url: URL_GET_CUENTAS,
+                    type: 'GET',
+                    success: function(data) {
+                        console.log('Respuesta del servidor (cuentas):', data);
+                        if (data.error) {
+                            mostrarErrorCuentas(data.error);
+                        } else {
+                            cuentasData = data;
+                            mostrarCuentas(data);
+                            llenarSelectCuentas(data);
+                            llenarFiltroMoneda(data);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error AJAX:', xhr.status, xhr.responseText, error);
+                        mostrarErrorCuentas('Error al cargar las cuentas: ' + error);
+                    }
+                });
+            }
+
+            function mostrarCuentas(cuentas) {
+                $('#cuentasLoading').addClass('hidden');
+                $('#cuentasContent').removeClass('hidden');
+                const tbody = $('#cuentasTableBody');
+                tbody.empty();
+
+                if (!cuentas || cuentas.length === 0) {
+                    tbody.append('<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay cuentas disponibles</td></tr>');
+                    return;
+                }
+
+                cuentas.forEach(function(cuenta) {
+                    const estadoBadge = cuenta.estado === 'ACTIVO'
+                        ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Activo</span>'
+                        : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Inactivo</span>';
+
+                    const row = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${cuenta.codigo}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cuenta.nombreCliente}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cuenta.emailCliente}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${cuenta.telefonoCliente}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cuenta.moneda}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatearMoneda(cuenta.saldo, cuenta.moneda)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${estadoBadge}</td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+
+            function mostrarErrorCuentas(mensaje) {
+                $('#cuentasLoading').addClass('hidden');
+                $('#cuentasError').text(mensaje).removeClass('hidden');
+            }
+
+            function llenarSelectCuentas(cuentas) {
+                const select = $('#selectCuenta');
+                select.empty();
+                select.append('<option value="">-- Todas las cuentas --</option>');
+                cuentas.forEach(function(cuenta) {
+                    select.append(`<option value="${cuenta.codigo}">${cuenta.codigo} - ${cuenta.nombreCliente}</option>`);
+                });
+            }
+
+            function llenarFiltroMoneda(cuentas) {
+                const select = $('#filtroMoneda');
+                select.empty();
+                select.append('<option value="">-- Todas --</option>');
+                const monedas = [...new Set(cuentas.map(c => c.moneda))];
+                monedas.forEach(function(moneda) {
+                    select.append(`<option value="${moneda}">${moneda}</option>`);
+                });
+            }
+
+            function filtrarCuentas() {
+                let filtered = cuentasData.slice();
+                const estado = $('#filtroEstado').val();
+                if (estado) {
+                    filtered = filtered.filter(c => c.estado === estado);
+                }
+                const moneda = $('#filtroMoneda').val();
+                if (moneda) {
+                    filtered = filtered.filter(c => c.moneda === moneda);
+                }
+                const busqueda = $('#busquedaCliente').val().toLowerCase();
+                if (busqueda) {
+                    filtered = filtered.filter(c => c.nombreCliente.toLowerCase().includes(busqueda));
+                }
+                mostrarCuentas(filtered);
+            }
+
+            function cargarMovimientos(codigoCuenta) {
+                cargarMovimientosCuentaEspecifica(codigoCuenta);
+            }
+
+            function cargarMovimientosCuentaEspecifica(codigoCuenta) {
+                $('#movimientosEmpty').addClass('hidden');
+                $('#movimientosContent').addClass('hidden');
+                $('#movimientosError').addClass('hidden');
+                $('#movimientosLoading').removeClass('hidden');
+
+                $.ajax({
+                    url: URL_GET_MOVIMIENTOS,
+                    type: 'GET',
+                    data: { cuenta: codigoCuenta },
+                    success: function(data) {
+                        if (data.error) {
+                            mostrarErrorMovimientos(data.error);
+                        } else {
+                            mostrarMovimientos(data, codigoCuenta, false);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        mostrarErrorMovimientos('Error al cargar los movimientos: ' + error);
+                    }
+                });
+            }
+
+            function cargarTodosMovimientos() {
+                $('#movimientosEmpty').addClass('hidden');
+                $('#movimientosContent').addClass('hidden');
+                $('#movimientosError').addClass('hidden');
+                $('#movimientosLoading').removeClass('hidden');
+
+                $.ajax({
+                    url: URL_GET_TODOS_MOVIMIENTOS,
+                    type: 'GET',
+                    success: function(data) {
+                        if (data.error) {
+                            mostrarErrorMovimientos(data.error);
+                        } else {
+                            mostrarMovimientos(data, null, true);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        mostrarErrorMovimientos('Error al cargar todos los movimientos: ' + error);
+                    }
+                });
+            }
+
+            function mostrarMovimientos(movimientos, codigoCuenta, todosLosMovimientos = false) {
+                $('#movimientosLoading').addClass('hidden');
+                $('#movimientosContent').removeClass('hidden');
+
+                const titulo = todosLosMovimientos ? 'Todos los Movimientos' : `Movimientos de la Cuenta ${codigoCuenta}`;
+                $('#movimientosTitle').text(titulo);
+                const tbody = $('#movimientosTableBody');
+                tbody.empty();
+
+                if (!movimientos || movimientos.length === 0) {
+                    const mensaje = todosLosMovimientos ? 'No hay movimientos en ninguna cuenta' : `No hay movimientos para la cuenta ${codigoCuenta}`;
+                    $('#movimientosContent').addClass('hidden');
+                    $('#movimientosEmpty').text(mensaje).removeClass('hidden');
+                    return;
+                }
+
+                $('#movimientosEmpty').addClass('hidden'); 
+
+                movimientos.forEach(function(mov) {
+                    const tipoBadge = obtenerBadgeTipo(mov.tipo);
+                    // Los objetos de fecha de SOAP pueden ser complejos, los parseamos
+                    const fecha = new Date(mov.fecha).toLocaleDateString('es-ES', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    
+                    let cuentaInfo = '';
+                    if (todosLosMovimientos) {
+                        const cuenta = cuentasData.find(c => c.codigo === mov.codigoCuenta);
+                        cuentaInfo = cuenta ? `${cuenta.codigo} - ${cuenta.nombreCliente}` : mov.codigoCuenta;
+                    } else {
+                        const cuenta = cuentasData.find(c => c.codigo === codigoCuenta);
+                        cuentaInfo = cuenta ? `${cuenta.codigo} - ${cuenta.nombreCliente}` : codigoCuenta;
+                    }
+
+                    const row = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cuentaInfo}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${mov.numero}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${fecha}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${tipoBadge}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${mov.referencia || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatearMoneda(mov.importe, 'USD')}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">${formatearMoneda(mov.saldoActual, 'USD')}</td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+
+            function mostrarErrorMovimientos(mensaje) {
+                $('#movimientosLoading').addClass('hidden');
+                $('#movimientosError').text(mensaje).removeClass('hidden');
+            }
+
+            function obtenerBadgeTipo(tipo) {
+                // Normaliza el tipo (ej. "DEPOSITO" -> "Deposito")
+                let tipoNormalizado = tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
+                
+                const tiposMovimiento = {
+                    'Apertura de Cuenta': { texto: 'Apertura de Cuenta', color: 'bg-slate-100 text-slate-800' },
+                    'Deposito': { texto: 'Depósito', color: 'bg-green-100 text-green-800' },
+                    'Retiro': { texto: 'Retiro', color: 'bg-orange-100 text-orange-800' },
+                    'Cancelar Cuenta': { texto: 'Cancelar Cuenta', color: 'bg-red-100 text-red-800' },
+                    'Transferencia': { texto: 'Transferencia', color: 'bg-slate-100 text-slate-800' }
+                };
+                
+                const tipoInfo = tiposMovimiento[tipoNormalizado] || { texto: tipo, color: 'bg-gray-100 text-gray-800' };
+                return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tipoInfo.color}">${tipoInfo.texto}</span>`;
+            }
+
+            function formatearMoneda(cantidad, moneda) {
+                let simbolo = '$'; // default USD
+                if (moneda === '01') simbolo = 'S/'; // Soles
+                else if (moneda === '02') simbolo = '$'; // USD
+                
+                let numCantidad = Number(cantidad);
+                if (isNaN(numCantidad)) {
+                    numCantidad = 0;
+                }
+                
+                return simbolo + ' ' + numCantidad.toFixed(2);
+            }
+
+            function cerrarModal() {
+                $('#modalCrearMovimiento').addClass('hidden');
+                $('#formCrearMovimiento')[0].reset();
+                $('#divCuentaDestino').addClass('hidden');
+                $('#modalError').addClass('hidden');
+                $('#imagenTipoMovimiento').addClass('hidden');
+            }
+
+            function mostrarErrorModal(mensaje) {
+                $('#modalError').text(mensaje).removeClass('hidden');
+            }
+
+            function crearMovimiento(datos) {
+                console.log('Creando movimiento:', datos);
+                $.ajax({
+                    url: URL_CREAR_MOVIMIENTO,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function(response) {
+                        console.log('Respuesta del servidor:', response);
+                        if (response.success) {
+                            cerrarModal();
+                            refrescarMovimientosActuales();
+                            alert('Movimiento creado exitosamente');
+                        } else {
+                            mostrarErrorModal(response.message || 'Error al crear el movimiento');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al crear movimiento:', error);
+                        mostrarErrorModal('Error al conectar con el servidor: ' + error);
+                    }
+                });
+            }
+            
+            function refrescarMovimientosActuales() {
+                const cuentaSeleccionada = $('#selectCuenta').val();
+                if (cuentaSeleccionada) {
+                    cargarMovimientosCuentaEspecifica(cuentaSeleccionada);
+                } else {
+                    cargarTodosMovimientos();
+                }
+            }
+        
+            /*]]>*/
+        </script>
+    </th:block>
+
+</body>
+</html>

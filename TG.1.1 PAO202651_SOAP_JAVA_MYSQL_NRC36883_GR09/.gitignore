@@ -1,0 +1,50 @@
+# Maven / Java build output
+**/target/
+**/build/
+**/out/
+**/.gradle/
+*.class
+*.log
+*.dump
+*.dumpstream
+*.original
+hs_err_pid*.log
+replay_pid*.log
+
+# Android Studio local state and packaged output
+local.properties
+.cxx/
+.externalNativeBuild/
+captures/
+*.apk
+*.aab
+*.dex
+
+# IDE settings and local-only project configuration
+.idea/
+.vscode/
+**/nbproject/private/
+*.iml
+**/.maven-settings.xml
+.maven-cache/
+.superpowers/
+/docs/superpowers/
+
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-secret.properties
+*.jks
+*.keystore
+*.p12
+*.key
+*.pem
+
+# Operating system and temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
