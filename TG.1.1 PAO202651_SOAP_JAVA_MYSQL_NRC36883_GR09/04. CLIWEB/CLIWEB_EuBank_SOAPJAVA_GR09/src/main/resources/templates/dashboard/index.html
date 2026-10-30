@@ -36,52 +36,28 @@
         table thead th { color: #FFFFFF; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <img th:src="@{/images/image-sidebar.webp}" alt="EurekaBank" class="h-10 w-full max-w-[200px] object-contain">
-                    </div>
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a th:if="${session.Usuario != null}" th:href="@{/dashboard}"
-                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Panel de Control
-                        </a>
-                    </div>
-                </div>
-                <div class="hidden sm:ml-6 sm:flex sm:items-center" th:if="${session.Usuario != null}">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-700">
-                            Usuario: <strong class="text-eubank-primary" th:text="${session.Usuario}"></strong>
-                        </span>
-                        <a th:href="@{/logout}"
-                           class="text-red-600 hover:text-red-800 px-3 py-2 rounded-md text-sm font-medium transition duration-200">
-                            Cerrar Sesión
-                        </a>
-                    </div>
-                </div>
-            </div>
+<body class="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <aside class="w-full shrink-0 bg-eubank-primary text-white shadow-lg md:sticky md:top-0 md:flex md:h-screen md:w-64 md:flex-col md:self-start md:overflow-y-auto">
+        <div class="flex items-center gap-3 border-b border-white/15 px-5 py-5">
+            <img th:src="@{/images/image-sidebar.webp}" alt="EurekaBank" class="h-14 w-52 object-contain">
+        </div>
+        <nav class="flex gap-2 overflow-x-auto p-4 md:flex-col" aria-label="Navegación principal">
+            <button class="tab-button active flex shrink-0 items-center rounded-lg bg-white/15 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20 md:w-full" data-tab="cuentas">
+                Cuentas de Clientes
+            </button>
+            <button class="tab-button flex shrink-0 items-center rounded-lg px-4 py-3 text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white md:w-full" data-tab="movimientos">
+                Movimientos
+            </button>
         </nav>
-    </header>
+        <div class="mt-auto border-t border-white/15 p-4">
+            <a th:href="@{/logout}" class="block rounded-lg px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 hover:text-white/75">
+                Cerrar Sesión
+            </a>
+        </div>
+    </aside>
 
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <main role="main">
-            
-            <div class="mb-6">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8">
-                        <button class="tab-button active border-b-2 border-eubank-secondary py-2 px-1 text-sm font-medium text-eubank-secondary" data-tab="cuentas">
-                            💳 Cuentas de Clientes
-                        </button>
-                        <button class="tab-button border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="movimientos">
-                            📊 Movimientos
-                        </button>
-                    </nav>
-                </div>
-            </div>
+    <div class="min-w-0 flex-1">
+        <main role="main" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             
             <div class="tab-content">
                 <div id="cuentas" class="tab-pane active">
@@ -164,7 +140,6 @@
                         <div class="p-6">
                             <div class="mb-6 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-4 flex items-center justify-between shadow-sm">
                                 <div class="flex items-center space-x-4">
-                                    <img th:src="@{/images/SulliGeneral.png}" alt="Sulli Bank" class="h-24 w-24 object-contain">
                                     <div>
                                         <h6 class="text-lg font-semibold text-eubank-primary">Movimientos Bancarios</h6>
                                         <p class="text-sm text-gray-600">Revisa los movimientos realizados entre las cuentas bancarias.</p>
@@ -334,8 +309,8 @@
                 // Manejar cambio de pestañas
                 $('.tab-button').click(function() {
                     const tabName = $(this).data('tab');
-                    $('.tab-button').removeClass('active border-eubank-secondary text-eubank-secondary').addClass('border-transparent text-gray-500');
-                    $(this).addClass('active border-eubank-secondary text-eubank-secondary');
+                    $('.tab-button').removeClass('active bg-white/15 text-white').addClass('text-white/75');
+                    $(this).removeClass('text-white/75').addClass('active bg-white/15 text-white');
                     $('.tab-pane').addClass('hidden');
                     $('#' + tabName).removeClass('hidden');
                     if (tabName === 'movimientos' && !$('#selectCuenta').val()) {
