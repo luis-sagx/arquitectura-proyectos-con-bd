@@ -1,0 +1,17 @@
+﻿:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111827; }
+[hidden] { display: none !important; }
+.login-screen { position: fixed; inset: 0; z-index: 20; background-color: #020617; background-position: center; background-size: cover; }
+.login-screen::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg,rgba(2,6,23,.78),rgba(11,31,58,.38)); }
+.login-screen main { position: relative; z-index: 1; }
+#sidebar { display: flex; }
+#sidebar.hidden { display: none; }
+#dashboard { min-height: 100vh; }
+.tab-button.active { background: rgba(255,255,255,.15); color: white; }
+.tab-button:not(.active) { color: rgba(255,255,255,.75); }
+.loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #173f66; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+table thead { background-color: #0b1f3a; color: #fff; }
+table th { padding: .75rem 1.5rem; text-align: left; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+table td { padding: 1rem 1.5rem; white-space: nowrap; }
+#sidebar { min-height: 100vh; }
+@media (max-width: 767px) { #sidebar { min-height: auto; } #sidebar > div:last-child { margin-top: 0; } }

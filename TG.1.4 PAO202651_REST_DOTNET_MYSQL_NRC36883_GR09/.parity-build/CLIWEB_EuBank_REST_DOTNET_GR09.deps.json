@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "CLIWEB_EuBank_REST_DOTNET_GR09/1.0.0": {
+        "runtime": {
+          "CLIWEB_EuBank_REST_DOTNET_GR09.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "CLIWEB_EuBank_REST_DOTNET_GR09/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

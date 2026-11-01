@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/04. CLICON/">
+    <Project Path="04. CLICON/CLICON_EuBank_SOAP_DOTNET_GR09/CLICON_EuBank_SOAP_DOTNET_GR09.csproj" />
+  </Folder>
+  <Folder Name="/04. CLIESC/">
+    <Project Path="04. CLIESC/CLIESC_EuBank_SOAP_DOTNET_GR09/CLIESC_EuBank_SOAP_DOTNET_GR09.csproj" />
+  </Folder>
+  <Folder Name="/04. CLIMOV/">
+    <Project Path="04. CLIMOV/CLIMOV_EurekaBank_SOAP_DOTNET_GR09/CLIMOV_EurekaBank_SOAP_DOTNET_GR09.csproj" />
+  </Folder>
+  <Folder Name="/04. CLIWEB/">
+    <Project Path="04. CLIWEB/CLIWEB_EuBank_SOAP_DOTNET_GR09/CLIWEB_EuBank_SOAP_DOTNET_GR09.csproj" />
+  </Folder>
+  <Folder Name="/04. SERVIDOR/">
+    <Project Path="04. SERVIDOR/WS_EuBank_SOAPDOTNET_GR09/WS_EuBank_SOAPDOTNET_GR09.csproj" />
+  </Folder>
+</Solution>

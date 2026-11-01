@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Shell x:Class="CLIMOV_EurekaBank_REST_DOTNET_GR09.AppShell"
+       xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:CLIMOV_EurekaBank_REST_DOTNET_GR09"
+       FlyoutBehavior="Disabled"
+       Title="EurekaBank REST">
+    <ShellContent Title="Iniciar sesión" Route="login" ContentTemplate="{DataTemplate local:LoginPage}" />
+</Shell>

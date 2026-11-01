@@ -1,0 +1,6 @@
+@WS_EuBank_REST_DOTNET_GR09_HostAddress = http://localhost:5219
+
+GET {{WS_EuBank_REST_DOTNET_GR09_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
