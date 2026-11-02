@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using MySqlConnector;
+using Microsoft.Data.SqlClient;
 using WS_EuBank_SOAPDOTNET_GR09.Contracts;
 
 namespace WS_EuBank_SOAPDOTNET_GR09;
@@ -8,14 +8,14 @@ namespace WS_EuBank_SOAPDOTNET_GR09;
 public sealed class BankRepository(string connectionString)
 {
     private const string EmployeeCode = "0001";
-    private MySqlConnection OpenConnection() => new(connectionString);
+    private SqlConnection OpenConnection() => new(connectionString);
 
     public async Task<bool> LoginAsync(string user, string password, CancellationToken cancellationToken)
     {
         await using var connection = OpenConnection();
         await connection.OpenAsync(cancellationToken);
-        await using var command = new MySqlCommand(
-            "SELECT vch_emplclave, vch_emplestado FROM Usuario WHERE vch_emplusuario=@user LIMIT 1", connection);
+        await using var command = new SqlCommand(
+            "SELECT TOP (1) vch_emplclave, vch_emplestado FROM dbo.Usuario WHERE vch_emplusuario=@user", connection);
         command.Parameters.AddWithValue("@user", user);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken) || reader.GetString(1) != "ACTIVO") return false;
@@ -31,13 +31,13 @@ public sealed class BankRepository(string connectionString)
             SELECT c.chr_cuencodigo, c.chr_monecodigo, c.dec_cuensaldo, c.vch_cuenestado,
                    CONCAT(cl.vch_cliepaterno, ' ', cl.vch_cliematerno, ', ', cl.vch_clienombre),
                    cl.vch_clieemail, cl.vch_clietelefono
-            FROM Cuenta c JOIN Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
+            FROM dbo.Cuenta c JOIN dbo.Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
             WHERE c.vch_cuenestado='ACTIVO'
             ORDER BY c.chr_cuencodigo
             """;
         await using var connection = OpenConnection();
         await connection.OpenAsync(cancellationToken);
-        await using var command = new MySqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var accounts = new List<CuentaData>();
         while (await reader.ReadAsync(cancellationToken)) accounts.Add(ReadAccount(reader));
@@ -47,22 +47,21 @@ public sealed class BankRepository(string connectionString)
     public async Task<CuentaData?> GetAccountAsync(string code, CancellationToken cancellationToken)
     {
         const string sql = """
-            SELECT c.chr_cuencodigo, c.chr_monecodigo, c.dec_cuensaldo, c.vch_cuenestado,
+            SELECT TOP (1) c.chr_cuencodigo, c.chr_monecodigo, c.dec_cuensaldo, c.vch_cuenestado,
                    CONCAT(cl.vch_cliepaterno, ' ', cl.vch_cliematerno, ', ', cl.vch_clienombre),
                    cl.vch_clieemail, cl.vch_clietelefono
-            FROM Cuenta c JOIN Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
+            FROM dbo.Cuenta c JOIN dbo.Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
             WHERE c.chr_cuencodigo=@code
-            LIMIT 1
             """;
         await using var connection = OpenConnection();
         await connection.OpenAsync(cancellationToken);
-        await using var command = new MySqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@code", code);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         return await reader.ReadAsync(cancellationToken) ? ReadAccount(reader) : null;
     }
 
-    private static CuentaData ReadAccount(MySqlDataReader reader) => new()
+    private static CuentaData ReadAccount(SqlDataReader reader) => new()
     {
         Codigo = reader.GetString(0).Trim(),
         Moneda = reader.GetString(1).Trim(),
@@ -79,17 +78,17 @@ public sealed class BankRepository(string connectionString)
             SELECT m.chr_cuencodigo, m.int_movinumero, m.id_movimiento, m.dtt_movifecha,
                    t.vch_tipodescripcion, t.vch_tipoaccion, m.dec_moviimporte,
                    m.chr_cuenreferencia, CONCAT(cl.vch_cliepaterno, ' ', cl.vch_cliematerno, ', ', cl.vch_clienombre)
-            FROM Movimiento m
-            JOIN TipoMovimiento t ON t.chr_tipocodigo=m.chr_tipocodigo
-            JOIN Cuenta c ON c.chr_cuencodigo=m.chr_cuencodigo
-            JOIN Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
+            FROM dbo.Movimiento m
+            JOIN dbo.TipoMovimiento t ON t.chr_tipocodigo=m.chr_tipocodigo
+            JOIN dbo.Cuenta c ON c.chr_cuencodigo=m.chr_cuencodigo
+            JOIN dbo.Cliente cl ON cl.chr_cliecodigo=c.chr_cliecodigo
             """;
         if (!string.IsNullOrWhiteSpace(account)) sql += " WHERE m.chr_cuencodigo=@account";
         sql += " ORDER BY m.dtt_movifecha, m.id_movimiento";
 
         await using var connection = OpenConnection();
         await connection.OpenAsync(cancellationToken);
-        await using var command = new MySqlCommand(sql, connection);
+        await using var command = new SqlCommand(sql, connection);
         if (!string.IsNullOrWhiteSpace(account)) command.Parameters.AddWithValue("@account", account);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var movements = new List<MovimientoData>();
@@ -128,7 +127,7 @@ public sealed class BankRepository(string connectionString)
 
         await using var connection = OpenConnection();
         await connection.OpenAsync(cancellationToken);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(cancellationToken);
         try
         {
             await MoveAsync(connection, transaction, origin, amount, type == "DEPOSITO", type, destination, cancellationToken);
@@ -144,11 +143,11 @@ public sealed class BankRepository(string connectionString)
         }
     }
 
-    private static async Task MoveAsync(MySqlConnection connection, MySqlTransaction transaction, string account,
+    private static async Task MoveAsync(SqlConnection connection, SqlTransaction transaction, string account,
         decimal amount, bool incoming, string type, string? reference, CancellationToken cancellationToken)
     {
-        await using var select = new MySqlCommand(
-            "SELECT dec_cuensaldo, int_cuencontmov, vch_cuenestado FROM Cuenta WHERE chr_cuencodigo=@code FOR UPDATE",
+        await using var select = new SqlCommand(
+            "SELECT dec_cuensaldo, int_cuencontmov, vch_cuenestado FROM dbo.Cuenta WITH (UPDLOCK, ROWLOCK, HOLDLOCK) WHERE chr_cuencodigo=@code",
             connection, transaction);
         select.Parameters.AddWithValue("@code", account);
         await using var reader = await select.ExecuteReaderAsync(cancellationToken);
@@ -166,8 +165,8 @@ public sealed class BankRepository(string connectionString)
             "RETIRO" => "004",
             _ => incoming ? "008" : "009"
         };
-        await using (var update = new MySqlCommand(
-            "UPDATE Cuenta SET dec_cuensaldo=@balance, int_cuencontmov=@count WHERE chr_cuencodigo=@code",
+        await using (var update = new SqlCommand(
+            "UPDATE dbo.Cuenta SET dec_cuensaldo=@balance, int_cuencontmov=@count WHERE chr_cuencodigo=@code",
             connection, transaction))
         {
             update.Parameters.AddWithValue("@balance", balance + (incoming ? amount : -amount));
@@ -175,10 +174,10 @@ public sealed class BankRepository(string connectionString)
             update.Parameters.AddWithValue("@code", account);
             await update.ExecuteNonQueryAsync(cancellationToken);
         }
-        await using var insert = new MySqlCommand("""
-            INSERT INTO Movimiento(chr_cuencodigo,int_movinumero,dtt_movifecha,chr_emplcodigo,chr_tipocodigo,dec_moviimporte,chr_cuenreferencia)
-            SELECT @code, COALESCE(MAX(int_movinumero),0)+1, CURDATE(), @employee, @type, @amount, @reference
-            FROM Movimiento WHERE chr_cuencodigo=@code
+        await using var insert = new SqlCommand("""
+            INSERT INTO dbo.Movimiento(chr_cuencodigo,int_movinumero,dtt_movifecha,chr_emplcodigo,chr_tipocodigo,dec_moviimporte,chr_cuenreferencia)
+            SELECT @code, COALESCE(MAX(int_movinumero),0)+1, CONVERT(date, GETDATE()), @employee, @type, @amount, @reference
+            FROM dbo.Movimiento WHERE chr_cuencodigo=@code
             """, connection, transaction);
         insert.Parameters.AddWithValue("@code", account);
         insert.Parameters.AddWithValue("@employee", EmployeeCode);

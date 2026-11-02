@@ -60,18 +60,14 @@ while (running)
                 break;
             }
             case 3:
-            case 4:
-            case 5:
-            {
-                var types = await SoapBankClient.MovementTypesAsync();
-                var request = view.GetCrearMovimientoData(types);
-                if (request is null) { Continue(); break; }
-                var error = await SoapBankClient.ProcessMovementAsync(request);
-                if (error is null) view.ShowMessage("Movimiento registrado exitosamente.");
-                else view.ShowError(error);
-                Continue();
+                await RegisterMovement(view, "DEPOSITO");
                 break;
-            }
+            case 4:
+                await RegisterMovement(view, "RETIRO");
+                break;
+            case 5:
+                await RegisterMovement(view, "TRANSFERENCIA");
+                break;
             case 6:
                 running = false;
                 break;
@@ -92,4 +88,19 @@ static void Continue()
 {
     Console.WriteLine("\nPresione Enter para continuar...");
     Console.ReadLine();
+}
+
+static async Task RegisterMovement(ConsoleView view, string type)
+{
+    var request = view.GetCrearMovimientoData(type);
+    if (request is null)
+    {
+        Continue();
+        return;
+    }
+
+    var error = await SoapBankClient.ProcessMovementAsync(request);
+    if (error is null) view.ShowMessage("Movimiento registrado exitosamente.");
+    else view.ShowError(error);
+    Continue();
 }

@@ -4,7 +4,7 @@ using WS_EuBank_SOAPDOTNET_GR09.Services;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
     ?? builder.Configuration.GetConnectionString("EurekaBank")
-    ?? "Server=localhost;Port=3306;Database=eurekabank;User ID=root;SslMode=None;Allow User Variables=True";
+    ?? "Server=localhost;Database=EurekaBank;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True";
 
 builder.Services.AddSingleton(new BankRepository(connectionString));
 builder.Services.AddScoped<LoginService>();

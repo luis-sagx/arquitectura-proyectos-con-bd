@@ -15,4 +15,5 @@
 /TG.1.2 PAO202651_SOAP_DOTNET_MYSQL_NRC36883_GR09/.env
 /TG.1.2 PAO202651_SOAP_DOTNET_MYSQL_NRC36883_GR09/04. SERVIDOR/WS_EuBank_SOAPDOTNET_GR09/appsettings.Development.json
 **/.dotnet-home/
+*.csproj.user
 /.parity-build/
