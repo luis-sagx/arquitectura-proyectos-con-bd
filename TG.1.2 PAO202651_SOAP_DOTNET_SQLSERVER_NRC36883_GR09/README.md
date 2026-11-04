@@ -9,7 +9,7 @@ Requisitos: SQL Server en ejecución, `sqlcmd` y .NET 10. El servidor local pred
 Desde la raíz del repositorio, ejecuta:
 
 ```powershell
-sqlcmd -S localhost -E -b -i "TG.1.2 PAO202651_SOAP_DOTNET_MYSQL_NRC36883_GR09/03. DBB/sqlserver/eurekabank.sql"
+sqlcmd -S localhost -E -b -i "TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/03. DBB/sqlserver/eurekabank.sql"
 ```
 
 El script crea la base si hace falta, define las tablas e índices, y carga las filas de ejemplo una sola vez. Si usas otra instancia o autenticación SQL, configura `DB_CONNECTION` antes de iniciar el servidor:

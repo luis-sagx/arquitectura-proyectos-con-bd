@@ -16,7 +16,7 @@ Port de la solución REST Java a .NET, guiado por la referencia RESTFUL_DOTNET_E
 Requisitos: SQL Server en ejecución, `sqlcmd` y .NET 10. El servidor local predeterminado se conecta a `localhost`, base `EurekaBank`, con autenticación integrada de Windows. Inicializa la base desde la raíz del repositorio:
 
 ```powershell
-sqlcmd -S localhost -E -b -i "TG.1.4 PAO202651_REST_DOTNET_MYSQL_NRC36883_GR09/03. DBB/sqlserver/eurekabank.sql"
+sqlcmd -S localhost -E -b -i "TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/03. DBB/sqlserver/eurekabank.sql"
 ```
 
 El script crea la base, tablas e índices, y carga los datos de ejemplo una sola vez. Para otra instancia o autenticación SQL, configura `DB_CONNECTION` antes de iniciar la API:
@@ -28,15 +28,15 @@ $env:DB_CONNECTION = "Server=localhost;Database=EurekaBank;User ID=USUARIO;Passw
 Inicia la API desde la raíz del repositorio:
 
 ```powershell
-dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_MYSQL_NRC36883_GR09/04. SERVIDOR/WS_EuBank_RESTDOTNET_GR09/WS_EuBank_REST_DOTNET_GR09.csproj' --urls http://localhost:9090
+dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/04. SERVIDOR/WS_EuBank_RESTDOTNET_GR09/WS_EuBank_REST_DOTNET_GR09.csproj' --urls http://localhost:9090
 ```
 
 En otra terminal inicia la web:
 
 ```powershell
-dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_MYSQL_NRC36883_GR09/04. CLIWEB/CLIWEB_EuBank_REST_DOTNET_GR09/CLIWEB_EuBank_REST_DOTNET_GR09.csproj' --urls http://localhost:8091
+dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/04. CLIWEB/CLIWEB_EuBank_REST_DOTNET_GR09/CLIWEB_EuBank_REST_DOTNET_GR09.csproj' --urls http://localhost:8091
 ```
 
-Abre `http://localhost:8091`. Para escritorio usa `dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_MYSQL_NRC36883_GR09/04. CLIESC/CLIESC_EuBank_REST_DOTNET_GR09/CLIESC_EuBank_REST_DOTNET_GR09.csproj'`; la consola se inicia con el proyecto `04. CLICON`. MAUI requiere instalar el workload correspondiente (`dotnet workload install maui-android`). En Android Emulator se llega a la API del equipo anfitrión por `10.0.2.2:9090`.
+Abre `http://localhost:8091`. Para escritorio usa `dotnet run --project 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/04. CLIESC/CLIESC_EuBank_REST_DOTNET_GR09/CLIESC_EuBank_REST_DOTNET_GR09.csproj'`; la consola se inicia con el proyecto `04. CLICON`. MAUI requiere instalar el workload correspondiente (`dotnet workload install maui-android`). En Android Emulator se llega a la API del equipo anfitrión por `10.0.2.2:9090`.
 
 Los endpoints principales son `POST /api/login`, `GET /api/cuentas`, `GET /api/cuentas/{codigo}`, `GET /api/movimientos?cuenta=...`, `GET /api/tiposmovimiento` y `POST /api/movimientos`.
