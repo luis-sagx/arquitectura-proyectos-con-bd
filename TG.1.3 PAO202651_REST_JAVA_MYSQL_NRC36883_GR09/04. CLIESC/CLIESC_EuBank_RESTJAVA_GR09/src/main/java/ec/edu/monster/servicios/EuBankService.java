@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class EuBankService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiUrl = System.getenv().getOrDefault("EUBANK_REST_URL",
-            "http://localhost:8080/WS_EurekaBank_RESTJAVA_GR09/api/eurekabank");
+            "https://recycled-facedown-traction.ngrok-free.dev/WS_EurekaBank_RESTJAVA_GR09/api/eurekabank");
 
     public boolean iniciarSesion(String usuario, String contrasena) {
         ResultadoOperacion result = restTemplate.postForObject(apiUrl + "/login",
