@@ -8,7 +8,7 @@ namespace CLICON_EuBank_SOAP_DOTNET_GR09;
 
 internal static class SoapBankClient
 {
-    private const string Root = "http://localhost:9091/Services/";
+    private const string Root = "https://recycled-facedown-traction.ngrok-free.dev/Services/";
     private const string LoginNs = "http://monster.edu.ec/eurekabank/login";
     private const string MovementsNs = "http://monster.edu.ec/eurekabank/movimientos";
     private const string SoapNs = "http://schemas.xmlsoap.org/soap/envelope/";

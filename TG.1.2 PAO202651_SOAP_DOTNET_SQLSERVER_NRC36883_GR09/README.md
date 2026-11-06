@@ -4,6 +4,26 @@ Servidor SOAP 1.1 y clientes .NET de consola, web, escritorio y móvil. Las inte
 
 ## Base de datos
 
+### Usar SQL Server con Docker Compose
+
+Desde la raíz del repositorio, crea el archivo local de variables. El usuario de la aplicación es `Monster` y su clave es `Monster9`:
+
+```powershell
+Copy-Item 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/.env.example' 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/.env'
+notepad 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/.env'
+docker compose --env-file 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/.env' -f 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/docker-compose.sqlserver.yml' up -d
+```
+
+Compose espera a que SQL Server esté listo y luego ejecuta el script de esquema y datos de ejemplo. La base persiste en el volumen `eurekabank-soap-sqlserver-data`; el puerto del equipo anfitrión es `14331`.
+
+Antes de ejecutar el servidor SOAP, configura la conexión desde la misma terminal:
+
+```powershell
+$env:DB_CONNECTION = "Server=localhost,14331;Database=EurekaBank;User ID=Monster;Password=Monster9;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+```
+
+Para detener el contenedor sin borrar la base: `docker compose --env-file 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/.env' -f 'TG.1.2 PAO202651_SOAP_DOTNET_SQLSERVER_NRC36883_GR09/docker-compose.sqlserver.yml' down`.
+
 Requisitos: SQL Server en ejecución, `sqlcmd` y .NET 10. El servidor local predeterminado se conecta a `localhost`, base `EurekaBank`, mediante autenticación integrada de Windows.
 
 Desde la raíz del repositorio, ejecuta:
