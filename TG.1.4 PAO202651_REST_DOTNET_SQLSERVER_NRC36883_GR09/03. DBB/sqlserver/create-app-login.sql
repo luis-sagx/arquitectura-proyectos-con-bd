@@ -1,0 +1,22 @@
+IF SUSER_ID(N'$(APP_DB_USER)') IS NULL
+BEGIN
+    CREATE LOGIN [$(APP_DB_USER)] WITH PASSWORD = N'$(APP_DB_PASSWORD)';
+END;
+GO
+
+USE [EurekaBank];
+GO
+
+IF USER_ID(N'$(APP_DB_USER)') IS NULL
+BEGIN
+    CREATE USER [$(APP_DB_USER)] FOR LOGIN [$(APP_DB_USER)];
+END;
+GO
+
+IF IS_ROLEMEMBER(N'db_datareader', N'$(APP_DB_USER)') <> 1
+    ALTER ROLE [db_datareader] ADD MEMBER [$(APP_DB_USER)];
+GO
+
+IF IS_ROLEMEMBER(N'db_datawriter', N'$(APP_DB_USER)') <> 1
+    ALTER ROLE [db_datawriter] ADD MEMBER [$(APP_DB_USER)];
+GO

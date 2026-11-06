@@ -13,6 +13,26 @@ Port de la solución REST Java a .NET, guiado por la referencia RESTFUL_DOTNET_E
 
 ## Arranque en Windows
 
+### Usar SQL Server con Docker Compose
+
+Desde la raíz del repositorio, crea el archivo local de variables. El usuario de la aplicación es `Monster` y su clave es `Monster9`:
+
+```powershell
+Copy-Item 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/.env.example' 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/.env'
+notepad 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/.env'
+docker compose --env-file 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/.env' -f 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/docker-compose.sqlserver.yml' up -d
+```
+
+Compose espera a que SQL Server esté listo y luego ejecuta el script de esquema y datos de ejemplo. La base persiste en el volumen `eurekabank-rest-sqlserver-data`; el puerto del equipo anfitrión es `14332`.
+
+Antes de ejecutar la API, configura la conexión desde la misma terminal:
+
+```powershell
+$env:DB_CONNECTION = "Server=localhost,14332;Database=EurekaBank;User ID=Monster;Password=Monster9;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+```
+
+Para detener el contenedor sin borrar la base: `docker compose --env-file 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/.env' -f 'TG.1.4 PAO202651_REST_DOTNET_SQLSERVER_NRC36883_GR09/docker-compose.sqlserver.yml' down`.
+
 Requisitos: SQL Server en ejecución, `sqlcmd` y .NET 10. El servidor local predeterminado se conecta a `localhost`, base `EurekaBank`, con autenticación integrada de Windows. Inicializa la base desde la raíz del repositorio:
 
 ```powershell

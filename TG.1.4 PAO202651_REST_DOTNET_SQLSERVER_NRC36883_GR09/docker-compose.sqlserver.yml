@@ -1,0 +1,43 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: eurekabank-rest-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en .env}
+    ports:
+      - "${SQLSERVER_PORT:-14332}:1433"
+    volumes:
+      - eurekabank-rest-sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -b > /dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  init-database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en .env}
+      APP_DB_USER: ${APP_DB_USER:-Monster}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-Monster9}
+    entrypoint: ["/bin/bash", "-c"]
+    command: >-
+      /opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -b -i /scripts/eurekabank.sql &&
+      /opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -v APP_DB_USER="$${APP_DB_USER}" APP_DB_PASSWORD="$${APP_DB_PASSWORD}" -b -i /scripts/create-app-login.sql
+    volumes:
+      - ./03. DBB/sqlserver/eurekabank.sql:/scripts/eurekabank.sql:ro
+      - ./03. DBB/sqlserver/create-app-login.sql:/scripts/create-app-login.sql:ro
+    restart: "no"
+
+volumes:
+  eurekabank-rest-sqlserver-data:
