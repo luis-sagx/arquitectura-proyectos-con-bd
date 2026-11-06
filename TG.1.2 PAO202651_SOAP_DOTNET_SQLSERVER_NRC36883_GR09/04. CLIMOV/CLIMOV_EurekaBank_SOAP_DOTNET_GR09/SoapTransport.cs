@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
@@ -10,6 +11,10 @@ internal static class SoapTransport
     internal const string MovementsNamespace = "http://monster.edu.ec/eurekabank/movimientos";
     private const string SoapNamespace = "http://schemas.xmlsoap.org/soap/envelope/";
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
+    // URL fijada al compilar con -p:ServerUrl=...; si no existe se usan 10.0.2.2 (emulador) o localhost.
+    private static readonly string? ServerUrl = typeof(SoapTransport).Assembly
+        .GetCustomAttributes<AssemblyMetadataAttribute>()
+        .FirstOrDefault(attribute => attribute.Key == "ServerUrl")?.Value?.TrimEnd('/');
 
     internal static XElement Argument(string ns, string name, string value) => new(XName.Get(name, ns), value);
     internal static async Task<XElement> CallAsync(string service, string ns, string contract, string operation, params XElement[] arguments)
@@ -24,6 +29,7 @@ internal static class SoapTransport
 #if !ANDROID
         request.RequestUri = new Uri($"http://localhost:9091/Services/{service}");
 #endif
+        if (!string.IsNullOrEmpty(ServerUrl)) request.RequestUri = new Uri($"{ServerUrl}/Services/{service}");
         request.Headers.Add("SOAPAction", $"\"{ns}/{contract}/{operation}\"");
         using var response = await Http.SendAsync(request);
         var text = await response.Content.ReadAsStringAsync();

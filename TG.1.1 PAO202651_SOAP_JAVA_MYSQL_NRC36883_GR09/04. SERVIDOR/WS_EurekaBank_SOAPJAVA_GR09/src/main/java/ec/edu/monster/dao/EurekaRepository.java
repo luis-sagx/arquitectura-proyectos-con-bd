@@ -83,7 +83,7 @@ public class EurekaRepository {
                 + "cl.vch_clietelefono, cl.vch_clieemail "
                 + "FROM Cuenta c "
                 + "INNER JOIN Cliente cl ON c.chr_cliecodigo = cl.chr_cliecodigo "
-                + "WHERE c.vch_cuenestado = 'ACTIVO' "
+                + "WHERE c.vch_cuenestado = 'ACTIVO' AND c.chr_cliecodigo = ? "
                 + "ORDER BY c.chr_cuencodigo";
         try (Connection cn = AccesoDB.getConnection(); PreparedStatement pstm = cn.prepareStatement(sql)) {
 
@@ -91,7 +91,15 @@ public class EurekaRepository {
             try (ResultSet rs = pstm.executeQuery()) {
                 while (rs.next()) {
                     DatosCuenta cc = new DatosCuenta();
-                    // ... (mismo mapeo que arriba)
+                    cc.setCodigo(rs.getString("chr_cuencodigo"));
+                    cc.setMoneda(rs.getString("chr_monecodigo"));
+                    cc.setSaldo(rs.getBigDecimal("dec_cuensaldo"));
+                    cc.setEstado(rs.getString("vch_cuenestado"));
+                    cc.setNombreCliente((rs.getString("vch_cliepaterno") + " "
+                            + rs.getString("vch_cliematerno") + ", "
+                            + rs.getString("vch_clienombre")).trim());
+                    cc.setEmailCliente(rs.getString("vch_clieemail"));
+                    cc.setTelefonoCliente(rs.getString("vch_clietelefono"));
                     lista.add(cc);
                 }
             }

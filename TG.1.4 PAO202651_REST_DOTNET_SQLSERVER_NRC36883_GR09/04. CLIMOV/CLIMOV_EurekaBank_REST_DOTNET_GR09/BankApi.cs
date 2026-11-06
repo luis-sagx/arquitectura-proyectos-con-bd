@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json;
 
 namespace CLIMOV_EurekaBank_REST_DOTNET_GR09;
@@ -7,10 +8,15 @@ internal static class BankApi
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
+    // URL fijada al compilar con -p:ServerUrl=...; si no existe se usan 10.0.2.2 (emulador) o localhost.
+    private static readonly string? ServerUrl = typeof(BankApi).Assembly
+        .GetCustomAttributes<AssemblyMetadataAttribute>()
+        .FirstOrDefault(attribute => attribute.Key == "ServerUrl")?.Value?.TrimEnd('/');
     private static string BaseUrl
     {
         get
         {
+            if (!string.IsNullOrEmpty(ServerUrl)) return $"{ServerUrl}/api";
 #if ANDROID
             return "http://10.0.2.2:9090/api";
 #else
@@ -60,7 +66,7 @@ internal static class BankApi
 
 internal sealed class LoginResult { public bool Success { get; set; } }
 internal sealed class ApiError { public string? Message { get; set; } }
-internal sealed class AccountDto
+public sealed class AccountDto
 {
     public string Codigo { get; set; } = "";
     public string Moneda { get; set; } = "";

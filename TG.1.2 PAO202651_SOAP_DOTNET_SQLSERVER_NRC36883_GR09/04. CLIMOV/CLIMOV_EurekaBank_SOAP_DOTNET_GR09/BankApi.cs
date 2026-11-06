@@ -62,7 +62,7 @@ internal static class BankApi
     }
 }
 
-internal sealed class AccountDto
+public sealed class AccountDto
 {
     public string Codigo { get; set; } = "";
     public string Moneda { get; set; } = "";

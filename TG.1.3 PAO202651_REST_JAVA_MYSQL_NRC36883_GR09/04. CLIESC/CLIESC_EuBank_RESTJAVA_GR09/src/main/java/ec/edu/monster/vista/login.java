@@ -79,7 +79,7 @@ public class login extends javax.swing.JFrame {
         lblTarea.setFont(new java.awt.Font("Britannic Bold", 0, 16)); // NOI18N
         lblTarea.setForeground(new java.awt.Color(11, 31, 58));
         lblTarea.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblTarea.setText("<html>Lindsay Barrionuevo<br>Joel Rivera<br>Leonardo Yaranga</html>");
+        lblTarea.setText("<html>Sebastian Parra<br>Luis Sagnay<br>Jefferson Yepez</html>");
         lblTarea.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         Background.add(lblTarea, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 120, 170, 60));
 

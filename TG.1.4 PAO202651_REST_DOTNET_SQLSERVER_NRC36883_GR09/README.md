@@ -1,6 +1,6 @@
 # EurekaBank REST .NET + SQL Server
 
-Port de la solución REST Java a .NET, guiado por la referencia RESTFUL_DOTNET_EUREKABANK_GR05. Conserva inicio de sesión, cuentas, movimientos, depósitos, retiros y transferencias. La API sirve `http://localhost:9090/api`; los clientes web, escritorio, consola y móvil mantienen esos flujos.
+Port de la solución REST Java a .NET. Conserva inicio de sesión, cuentas, movimientos, depósitos, retiros y transferencias. La API sirve `http://localhost:9090/api`; los clientes web, escritorio, consola y móvil mantienen esos flujos.
 
 ## Módulos
 

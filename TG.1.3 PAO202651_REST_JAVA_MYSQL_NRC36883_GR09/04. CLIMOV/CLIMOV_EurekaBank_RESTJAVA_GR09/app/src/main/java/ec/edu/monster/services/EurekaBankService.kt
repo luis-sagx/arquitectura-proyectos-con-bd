@@ -24,7 +24,7 @@ object EurekaBankService {
         runRequest(false, callback) {
             val response = post("/login", mapOf("usuario" to usuario, "contrasena" to contrasena))
             val result = gson.fromJson(response, ResultadoOperacion::class.java)
-            result.codigo == 1 to if (result.codigo == 1) "Login exitoso" else "Credenciales incorrectas"
+            (result.codigo == 1) to if (result.codigo == 1) "Login exitoso" else "Credenciales incorrectas"
         }
     }
 

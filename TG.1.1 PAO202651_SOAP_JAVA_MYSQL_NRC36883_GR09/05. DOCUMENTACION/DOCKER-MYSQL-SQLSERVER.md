@@ -1,6 +1,6 @@
-# Bases de datos locales con Docker Compose
+# Base de datos local con Docker Compose
 
-Hay un archivo Compose en la raíz del proyecto para cada motor. El servidor EurekaBank se conecta a **MySQL**; SQL Server es una instancia separada para prácticas y no es un backend configurado de la aplicación.
+El archivo `docker-compose.mysql.yml` de la raíz del proyecto levanta la base MySQL a la que se conecta el servidor EurekaBank.
 
 ## MySQL con esquema y datos EurekaBank
 
@@ -33,23 +33,12 @@ DB_USER=monster
 DB_PASSWORD=monster9
 ```
 
-El dataset incluye credenciales de ejemplo almacenadas como SHA-1; el login del servidor compara ese formato y solo acepta usuarios activos. Por ejemplo, el dataset del repositorio incluye `cromero` / `chicho`.
+El dataset incluye credenciales de ejemplo almacenadas como SHA-1; el login del servidor compara ese formato y solo acepta usuarios activos. El usuario de prueba es `Monster` / `Monster9`; es la única cuenta activa del dataset.
 
-## SQL Server 2022
-
-```powershell
-docker compose -f docker-compose.sqlserver.yml up -d
-docker compose -f docker-compose.sqlserver.yml ps
-docker compose -f docker-compose.sqlserver.yml logs -f sqlserver
-```
-
-El servidor publica el puerto `1433`, usa el usuario administrador `sa` y la contraseña `EurekaDev_2026!`. Sus datos quedan en un volumen separado. Esta configuración no cambia la conexión JDBC de la aplicación, que sigue usando MySQL.
-
-## Detener los contenedores
+## Detener el contenedor
 
 ```powershell
 docker compose -f docker-compose.mysql.yml down
-docker compose -f docker-compose.sqlserver.yml down
 ```
 
-Los volúmenes se conservan con `down`. Para borrarlos junto con los datos, usa `down -v` en el Compose correspondiente.
+El volumen se conserva con `down`. Para borrarlo junto con los datos, usa `down -v`.

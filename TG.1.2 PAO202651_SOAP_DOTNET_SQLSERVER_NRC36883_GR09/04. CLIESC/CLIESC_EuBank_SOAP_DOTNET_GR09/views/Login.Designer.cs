@@ -150,7 +150,7 @@ namespace CLIESC_EuBank_SOAP_DOTNET_GR09.views
             this.lblnames.Size = new System.Drawing.Size(152, 60);
             this.lblnames.TabIndex = 19;
             this.lblnames.Visible = false;
-            this.lblnames.Text = "Barrionuevo Lindsay\r\nRivera Joel\r\nYaranga Leonardo";
+            this.lblnames.Text = "Parra Sebastian\r\nSagnay Luis\r\nYepez Jefferson";
             this.lblnames.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // dotnet_image

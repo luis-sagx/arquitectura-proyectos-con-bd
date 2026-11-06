@@ -14,4 +14,11 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <MauiImage Include="Resources\Images\*" />
+  </ItemGroup>
+  <!-- URL opcional del servidor: dotnet publish ... -p:ServerUrl=https://host (sin ella se usa 10.0.2.2 / localhost). -->
+  <ItemGroup Condition="'$(ServerUrl)' != ''">
+    <AssemblyMetadata Include="ServerUrl" Value="$(ServerUrl)" />
+  </ItemGroup>
 </Project>

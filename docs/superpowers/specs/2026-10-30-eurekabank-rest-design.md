@@ -2,7 +2,7 @@
 
 ## Intención
 
-Crear una copia funcional del proyecto EurekaBank que use una API REST en lugar de SOAP, guiándose por la arquitectura de `TG1.3 RESTFUL_JAVA_EUREKABANK_GR05 20.0` en Descargas. La nueva versión debe conservar la lógica y las interfaces del proyecto SOAP, y permitir ejecutar ambos proyectos en paralelo.
+Crear una copia funcional del proyecto EurekaBank que use una API REST en lugar de SOAP, guiándose por la arquitectura de `TG1.3 RESTFUL_JAVA_EUREKABANK_GR09 20.0` en Descargas. La nueva versión debe conservar la lógica y las interfaces del proyecto SOAP, y permitir ejecutar ambos proyectos en paralelo.
 
 ## Objetivos
 
